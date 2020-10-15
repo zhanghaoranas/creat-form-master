@@ -89,10 +89,7 @@
 								{
 									"id": 3,
 									"type": "singlevideo",
-									"value": {
-										"thumbnail": "/static/upload/video/2020/10/08/17/uuid1.jpg",
-										"original": "/static/upload/video/2020/10/08/17/uuid2.mp4"
-									}
+									"value": "https://www.w3school.com.cn/i/movie.ogg"
 								}
 							]
 						},
@@ -182,23 +179,14 @@
 								{
 									"id": 5,
 									"type": "singlevideo",
-									"value": {
-										"thumbnail": "/static/upload/video/2020/10/08/17/uuid1.jpg",
-										"original": "/static/upload/video/2020/10/08/17/uuid2.mp4"
-									}
+									"value": "https://www.w3school.com.cn/i/movie.ogg"
 								},
 								{
 									"id": 6,
 									"type": "multiplevideo",
 									"value": [
-										{
-											"thumbnail": "/static/upload/video/2020/10/08/17/uuid1.jpg",
-											"original": "/static/upload/video/2020/10/08/17/uuid2.mp4"
-										},
-										{
-											"thumbnail": "/static/upload/video/2020/10/08/17/uuid1.jpg",
-											"original": "/static/upload/video/2020/10/08/17/uuid2.mp4"
-										}
+										"https://www.w3school.com.cn/i/movie.ogg",
+										"https://www.w3school.com.cn/i/movie.ogg"
 									]
 								},
 								{

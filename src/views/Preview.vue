@@ -39,11 +39,13 @@
 			</div>
 		</div>
 		<van-overlay :show="show" @click="show = false">
-			<div class="wrapper" @click.stop>
-				<van-swipe class="my-swipe" :autoplay="3000" indicator-color="white">
+			<div class="wrapper">
+				<van-swipe class="my-swipe">
 					<van-swipe-item v-for="(item, index) in curMediaData" :key="index">
-						<img v-if="item.type === 'image'" :src="item.url" alt="" />
-						<video v-else :src="item.url"></video>
+						<div class="show_media_box">
+							<img v-if="item.type === 'image'" :src="item.url" alt="" />
+							<video controls v-else :src="item.url" @click.stop></video>
+						</div>
 					</van-swipe-item>
 				</van-swipe>
 			</div>
@@ -52,245 +54,248 @@
 </template>
 
 <script>
-import {getPatrolRecord} from '../api';
-export default {
-	name: 'preview',
-	data() {
-		return {
-			previewData: {},
-			curMediaData: [],
-			show: false,
-		};
-	},
-	computed: {
-		equipmentInfo() {
-			if (this.previewData.data) {
-				return this.previewData.data.base_info.elements;
-			} else {
-				return [];
-			}
+	import {getPatrolRecord} from '../api';
+	export default {
+		name: 'preview',
+		data() {
+			return {
+				previewData: {},
+				curMediaData: [],
+				show: false,
+			};
 		},
-		groupInfo() {
-			if (this.previewData.data) {
-				// 对返回的数据进行处理。
-				return this.previewData.data.check_group.map((group) => {
-					return {
-						...group,
-						components: {
-							...group.components.map((component) => {
-								return {
-									...component,
-									label: component.elements
-										.filter((element) => {
-											return !(
-												element.type === 'singleimage' ||
-												element.type === 'singlevideo' ||
-												element.type === 'multipleimage' ||
-												element.type === 'multiplevideo'
-											);
-										})
-										.reduce((pre, cur) => {
-											// 当value 是一个数组时（element.type === 'checkbox'）。
-											const labelArr = [];
-											const {value, options, name} = cur;
-											if (Array.isArray(value)) {
-												if (value.length !== 0) {
-													const checkboxVal = [];
-													value.forEach((i) => {
-														options.forEach((j) => {
-															if (i == j.id) {
-																checkboxVal.push(j.name);
-															}
+		computed: {
+			equipmentInfo() {
+				if (this.previewData.data) {
+					return this.previewData.data.base_info.elements;
+				} else {
+					return [];
+				}
+			},
+			groupInfo() {
+				if (this.previewData.data) {
+					// 对返回的数据进行处理。
+					return this.previewData.data.check_group.map((group) => {
+						return {
+							...group,
+							components: {
+								...group.components.map((component) => {
+									return {
+										...component,
+										label: component.elements
+											.filter((element) => {
+												return !(
+													element.type === 'singleimage' ||
+													element.type === 'singlevideo' ||
+													element.type === 'multipleimage' ||
+													element.type === 'multiplevideo'
+												);
+											})
+											.reduce((pre, cur) => {
+												// 当value 是一个数组时（element.type === 'checkbox'）。
+												const labelArr = [];
+												const {value, options, name} = cur;
+												if (Array.isArray(value)) {
+													if (value.length !== 0) {
+														const checkboxVal = [];
+														value.forEach((i) => {
+															options.forEach((j) => {
+																if (i == j.id) {
+																	checkboxVal.push(j.name);
+																}
+															});
 														});
-													});
-													labelArr.push(checkboxVal);
-												}
-											} else {
-												if (value) {
-													if (options) {
-														options.forEach((j) => {
-															if (value === j.id) {
-																labelArr.push(j.name);
+														labelArr.push(checkboxVal);
+													}
+												} else {
+													if (value) {
+														if (options) {
+															options.forEach((j) => {
+																if (value === j.id) {
+																	labelArr.push(j.name);
+																}
+															});
+														} else {
+															if (name) {
+																labelArr.push(`${name}:${value}`);
 															}
-														});
-													} else {
-														if (name) {
-															labelArr.push(`${name}:${value}`);
 														}
 													}
 												}
-											}
-											return pre.concat(labelArr);
-										}, []),
-									imgUrl: component.elements
-										.filter(
-											(element) =>
-												element.type === 'singleimage' || element.type === 'multipleimage'
-										)
-										.reduce((pre, cur) => {
-											const imgUrlArr = [];
-											const {value} = cur;
-											if (Array.isArray(value)) {
-												if (value.length !== 0) {
-													imgUrlArr.push(...value);
+												return pre.concat(labelArr);
+											}, []),
+										imgUrl: component.elements
+											.filter(
+												(element) =>
+													element.type === 'singleimage' || element.type === 'multipleimage'
+											)
+											.reduce((pre, cur) => {
+												const imgUrlArr = [];
+												const {value} = cur;
+												if (Array.isArray(value)) {
+													if (value.length !== 0) {
+														imgUrlArr.push(...value);
+													}
+												} else {
+													// 排除是空对象的
+													if (Object.keys(value).length !== 0) {
+														imgUrlArr.push(value);
+													}
 												}
-											} else {
-												// 排除是空对象的
-												if (Object.keys(value).length !== 0) {
-													imgUrlArr.push(value);
+												return pre.concat(imgUrlArr);
+											}, []),
+										videoUrl: component.elements
+											.filter(
+												(element) =>
+													element.type === 'singlevideo' || element.type === 'multiplevideo'
+											)
+											.reduce((pre, cur) => {
+												const imgUrlArr = [];
+												const {value} = cur;
+												if (Array.isArray(value)) {
+													if (value.length !== 0) {
+														imgUrlArr.push(...value);
+													}
+												} else {
+													// 排除是空对象的
+													if (Object.keys(value).length !== 0) {
+														imgUrlArr.push(value);
+													}
 												}
-											}
-											return pre.concat(imgUrlArr);
-										}, []),
-									videoUrl: component.elements
-										.filter(
-											(element) =>
-												element.type === 'singlevideo' || element.type === 'multiplevideo'
-										)
-										.reduce((pre, cur) => {
-											const imgUrlArr = [];
-											const {value} = cur;
-											if (Array.isArray(value)) {
-												if (value.length !== 0) {
-													imgUrlArr.push(...value);
-												}
-											} else {
-												// 排除是空对象的
-												if (Object.keys(value).length !== 0) {
-													imgUrlArr.push(value);
-												}
-											}
-											return pre.concat(imgUrlArr);
-										}, []),
-								};
-							}),
-						},
-					};
-				});
-			} else {
-				return [];
-			}
-		},
-	},
-	mounted() {
-		this.getPreviewData();
-	},
-	methods: {
-		handleClickLeft() {},
-		async getPreviewData() {
-			const res = await getPatrolRecord({
-				id: 3216546,
-			});
-			this.previewData = res;
-		},
-		handlePreviewMedia(mediaData) {
-			this.curMediaData = mediaData.map((item) => {
-				if (item.thumbnail) {
-					return {
-						url: item.original,
-						type: 'image',
-					};
+												return pre.concat(imgUrlArr);
+											}, []),
+									};
+								}),
+							},
+						};
+					});
 				} else {
-					return {
-						url: item,
-						type: 'video',
-					};
+					return [];
 				}
-			});
-			this.show = true;
+			},
 		},
-		imagePreviewChange(data) {
-			console.log(data);
+		mounted() {
+			this.getPreviewData();
 		},
-	},
-};
+		methods: {
+			handleClickLeft() {},
+			async getPreviewData() {
+				const res = await getPatrolRecord({
+					id: 3216546,
+				});
+				this.previewData = res;
+			},
+			handlePreviewMedia(mediaData) {
+				console.log(mediaData);
+				this.curMediaData = mediaData.map((item) => {
+					if (item.thumbnail) {
+						return {
+							url: item.original,
+							type: 'image',
+						};
+					} else {
+						return {
+							url: item,
+							type: 'video',
+						};
+					}
+				});
+				console.log(this.curMediaData);
+				this.show = true;
+			},
+			imagePreviewChange(data) {
+				console.log(data);
+			},
+		},
+	};
 </script>
 
 <style lang="less" scoped>
-.base_info {
-	background-color: #fff;
-}
-.equipment_info {
-	display: flex;
-	flex-wrap: wrap;
-	text-align: center;
-	> div {
+	.base_info {
+		background-color: #fff;
+	}
+	.equipment_info {
 		display: flex;
-		flex-direction: column;
-		width: 33.3333%;
-		> span {
-			margin: -0.5px;
-			border: 0.5px solid #ebedf0;
-			line-height: 34px;
+		flex-wrap: wrap;
+		text-align: center;
+		> div {
+			display: flex;
+			flex-direction: column;
+			width: 33.3333%;
+			> span {
+				margin: -0.5px;
+				border: 0.5px solid #ebedf0;
+				line-height: 34px;
+			}
 		}
 	}
-}
-.equipment_info_value {
-	color: #969799;
-}
-.group_info {
-	background-color: #fff;
-	> h4 {
+	.equipment_info_value {
+		color: #969799;
+	}
+	.group_info {
+		background-color: #fff;
+		> h4 {
+			padding: 6px 16px;
+			margin-bottom: 0;
+			margin-top: 6px;
+		}
+	}
+	.component_info {
 		padding: 6px 16px;
-		margin-bottom: 0;
-		margin-top: 6px;
+		border-top: 1px solid #ebedf0;
+		> div {
+			display: flex;
+			justify-content: space-between;
+		}
 	}
-}
-.component_info {
-	padding: 6px 16px;
-	border-top: 1px solid #ebedf0;
-	> div {
-		display: flex;
-		justify-content: space-between;
+	.info_title {
+		margin: 6px 0;
 	}
-}
-.info_title {
-	margin: 6px 0;
-}
-.info_list {
-	font-size: 14px;
-	color: #969799;
-	> li {
-		height: 24px;
-	}
-}
-.media_area {
-	width: 120px;
-	height: 80px;
-	border: 0.5px solid #ebedf0;
-	border-radius: 4px;
-	align-self: flex-end;
-	overflow: hidden;
-	position: relative;
-	> img {
-		height: 100%;
-		width: 100%;
-	}
-	> video {
-		height: 120px;
-		width: 80px;
-	}
-	> span {
+	.info_list {
 		font-size: 14px;
-		background-color: #f2f3f5;
-		padding: 0 6px;
-		position: absolute;
-		bottom: 0;
-		right: 0;
+		color: #969799;
+		> li {
+			height: 24px;
+		}
 	}
-}
-.wrapper {
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	height: 100%;
-}
-.my-swipe .van-swipe-item {
-	width: 100vw;
-	color: #fff;
-	font-size: 20px;
-	line-height: 150px;
-	text-align: center;
-	background-color: #39a9ed;
-}
+	.media_area {
+		width: 120px;
+		height: 80px;
+		border: 0.5px solid #ebedf0;
+		border-radius: 4px;
+		align-self: flex-end;
+		overflow: hidden;
+		position: relative;
+		> img {
+			height: 100%;
+			width: 100%;
+		}
+		> video {
+			height: 120px;
+			width: 80px;
+		}
+		> span {
+			font-size: 14px;
+			background-color: #f2f3f5;
+			padding: 0 6px;
+			position: absolute;
+			bottom: 0;
+			right: 0;
+		}
+	}
+	.wrapper {
+		height: 100%;
+	}
+	.show_media_box {
+		width: 100%;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		> img {
+			width: 100%;
+		}
+		> video {
+			width: 100%;
+		}
+	}
 </style>
