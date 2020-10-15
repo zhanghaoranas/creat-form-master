@@ -1,0 +1,63 @@
+<template>
+	<van-field :value="showTimeData" center readonly label="提升时间(s)">
+		<template #button>
+			<van-button size="small" type="primary" @click="handleTimeRun">
+				{{ timing ? '停止计时' : timeData ? '重置计时' : '开始计时' }}
+			</van-button>
+		</template>
+	</van-field>
+</template>
+
+<script>
+import formItemMixin from '../mixin/index';
+export default {
+	name: 'input-text',
+	mixins: [formItemMixin],
+	data() {
+		return {
+			timing: false,
+			timeData: 0,
+		};
+	},
+	computed: {
+		showTimeData() {
+			return this.timeData / 1000;
+		},
+	},
+	methods: {
+		/**
+		 * @description 定时器的开始（重置） 与 暂停
+		 */
+		handleTimeRun() {
+			if (this.timeData === 0) {
+				this.timing = true;
+				this.interRun();
+			} else {
+				//不等于0 点击需要判断是 重置 还是 停止
+				if (this.timing === false) {
+					this.timeData = 0; // 重置
+				} else {
+					this.timing = false; // 暂停
+				}
+			}
+		},
+		interRun() {
+			const curTime = Date.now();
+			const timeAdd = () => {
+				this.timeData = Date.now() - curTime;
+				if (this.timing === true) {
+					window.requestAnimationFrame(timeAdd);
+				} else {
+					this.$nextTick(() => {
+						this.elementData.value = this.showTimeData;
+					});
+				}
+			};
+			window.requestAnimationFrame(timeAdd);
+		},
+	},
+};
+</script>
+
+<style lang="less" scoped>
+</style>
