@@ -2,7 +2,7 @@
 	<div class="radio_box">
 		<van-checkbox-group v-model="elementData.value">
 			<van-checkbox
-				class="has_margin_b8"
+				class="has_margin"
 				v-for="item in elementData.options"
 				:key="item.id"
 				:name="item.id"
@@ -24,10 +24,11 @@ export default {
 
 <style lang="less" scoped>
 .radio_box {
-	padding: 8px 16px;
+	padding: 4px 16px;
 	border-bottom: 1px solid #ebedf0;
+	font-size: 14px;
 }
-.has_margin_b8 {
-	margin-bottom: 8px;
+.has_margin {
+	margin: 8px 0;
 }
 </style>

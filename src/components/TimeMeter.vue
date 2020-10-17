@@ -17,12 +17,16 @@ export default {
 		return {
 			timing: false,
 			timeData: 0,
+			animationFrame: null,
 		};
 	},
 	computed: {
 		showTimeData() {
 			return this.timeData / 1000;
 		},
+	},
+	beforeDestroy() {
+		cancelAnimationFrame(this.animationFrame);
 	},
 	methods: {
 		/**
@@ -53,7 +57,7 @@ export default {
 					});
 				}
 			};
-			window.requestAnimationFrame(timeAdd);
+			this.animationFrame = window.requestAnimationFrame(timeAdd);
 		},
 	},
 };

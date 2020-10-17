@@ -1,15 +1,4 @@
 import Vue from 'vue';
-import App from './App.vue';
-import router from './router';
-// import('./mock/index.js');
-Vue.config.productionTip = false;
-
-if (process.env.NODE_ENV === 'development') {
-	// 不要使用 import() 要不然是按需引入，会先请求之后引入mock😂
-	require('./mock');
-}
-// 按需引入
-
 import {
 	Button,
 	Field,
@@ -29,6 +18,18 @@ import {
 	Swipe,
 	SwipeItem,
 } from 'vant';
+import App from './App.vue';
+import router from './router';
+
+/**
+if (process.env.NODE_ENV === 'development') {
+	// 不要使用 import() 要不然是按需引入，会先请求之后引入mock😂
+	require('./mock');
+}
+ */
+
+Vue.config.productionTip = false;
+
 Vue.use(Button)
 	.use(Field)
 	.use(Cell)

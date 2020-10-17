@@ -1,7 +1,13 @@
 <template>
 	<van-cell-group>
-		<van-cell :title="elementData.name" :value="elementData.value" @click="datePickerShow = true" />
-		<van-popup v-model="datePickerShow" position="bottom" :style="{ height: '40%' }">
+		<van-field
+			:value="elementData.value"
+			:label="elementData.name"
+			readonly
+			placeholder="请选择时间"
+			@click="datePickerShow = true"
+		/>
+		<van-popup v-model="datePickerShow" position="bottom" :style="{height: '308px'}">
 			<van-datetime-picker
 				v-model="pickerDate"
 				:type="datetimePickerType"
@@ -15,7 +21,7 @@
 
 <script>
 import formItemMixin from '../mixin/index';
-import { formatTime } from '../utils';
+import {formatTime} from '../utils';
 export default {
 	name: 'input-text',
 	mixins: [formItemMixin],

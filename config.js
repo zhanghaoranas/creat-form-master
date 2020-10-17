@@ -1,0 +1,4 @@
+const token =
+	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiQXV0aG9yaXphdGlvblNlcnZlciJdLCJ1c2VyX25hbWUiOiJhZG1pbiIsInNjb3BlIjpbImFwaSJdLCJncm91cGlkIjoidHlfb2F1dGhfaGJ4cyIsImV4cCI6MTYwMjkyMTUyNCwianRpIjoiOGNjMzMxZjEtZDE3OS00NjBkLWFjMTktM2IyMTlhZGUyYzY0IiwiY2xpZW50X2lkIjoiY2xpZW50X3Bhc3NfMSIsInVzZXJuYW1lIjoiYWRtaW4ifQ.Nbo5u3eeZ35HqRZ4zqCGjIHgBt41CmhLpI-gEM0KNNM';
+const baseURL = '/jeecg-boot';
+export {token, baseURL};

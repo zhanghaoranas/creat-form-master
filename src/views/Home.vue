@@ -1,13 +1,6 @@
 <template>
 	<section>
-		<van-nav-bar
-			title="标题"
-			left-text="返回"
-			right-text="按钮"
-			left-arrow
-			@click-left="handleClickLeft"
-			@click-right="handleClickRight"
-		>
+		<van-nav-bar :title="title" right-text="按钮" @click-left="handleClickLeft" @click-right="handleClickRight">
 			<template #right>
 				<van-button type="primary" size="mini"> 保存 </van-button>
 			</template>
@@ -15,7 +8,7 @@
 		<van-tabs sticky>
 			<van-tab v-for="item in checkGroup" :key="item.group_id" :title="item.group_name">
 				<div v-for="component in item.components" :key="component.component_id" class="check_item">
-					<h4>{{ component.component_name }}</h4>
+					<h5>{{ component.component_name }}</h5>
 					<form-item
 						v-for="element in component.elements"
 						:key="element.id"
@@ -37,6 +30,7 @@ export default {
 	},
 	data() {
 		return {
+			title: '填写巡检报告',
 			baseInfo: {},
 			checkGroup: [],
 		};
@@ -66,7 +60,7 @@ export default {
 		 */
 		async getComponentsTypeData() {
 			const {data} = await getComponentsTypeApi({
-				categoryCode: 'PC200',
+				categoryCode: 'PC200-5000',
 				template_version: 1,
 			});
 			this.checkGroup = data.check_group;
@@ -79,6 +73,9 @@ export default {
 		getBaseInfoData() {
 			this.setBaseinfo();
 		},
+		/**
+		 * @description 通过url中获取baseInfo.
+		 */
 		setBaseinfo() {},
 		/**
 		 * @description 点击提交时需要获取当前定位
@@ -105,8 +102,8 @@ export default {
 <style lang="less" scoped>
 .check_item {
 	background-color: #fff;
-	margin-bottom: 6px;
-	> h4 {
+	margin-top: 6px;
+	> h5 {
 		margin: 0;
 		padding: 9px 16px;
 		border-bottom: 1px solid #ebedf0;

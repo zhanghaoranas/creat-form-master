@@ -1,6 +1,12 @@
 <template>
 	<div class="upload_file">
-		<van-uploader v-model="fileList" :max-count="maxCount" :after-read="afterRead" @delete="handleDelete" />
+		<van-uploader
+			v-model="fileList"
+			:before-read="beforeRead"
+			:max-count="maxCount"
+			:after-read="afterRead"
+			@delete="handleDelete"
+		/>
 	</div>
 </template>
 
@@ -28,6 +34,11 @@ export default {
 	},
 	created() {},
 	methods: {
+		beforeRead(file) {
+			if (this.isImg) {
+			} else {
+			}
+		},
 		/**
 		 * @description 通过file对象可以自行将文件上传
 		 */

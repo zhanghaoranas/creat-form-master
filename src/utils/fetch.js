@@ -1,10 +1,11 @@
 import axios from 'axios';
 import qs from 'qs';
-
+import {baseURL, token} from '../../config';
 // 生成axios 实例 保证axios
 const axiosInstance = axios.create({
-	baseURL: '/mock',
+	baseURL: baseURL,
 	timeout: 5000,
+	headers: {'X-Access-Token': token},
 });
 
 // 添加请求拦截器
@@ -61,4 +62,4 @@ const createAxios = (type) => (url, data = {}, config = {}) => {
 const fetchPost = createAxios('post');
 const fetchGet = createAxios('get');
 
-export { fetchGet, fetchPost };
+export {fetchGet, fetchPost};
