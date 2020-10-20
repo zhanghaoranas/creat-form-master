@@ -31,6 +31,7 @@
 </template>
 
 <script>
+import queryString from 'query-string';
 import {getComponentsTypeApi, addPatrolRecord, getPatrolRecord, updatePatrolRecord} from '../api/index';
 import {formatTime} from '../utils';
 import FormItem from '../components/FormItem.vue';
@@ -43,8 +44,6 @@ export default {
 	},
 	data() {
 		return {
-			id: '1318093163238662145',
-			title: '填写巡检报告',
 			baseInfo: {},
 			checkGroup: [],
 			otherInfo: {
@@ -53,20 +52,32 @@ export default {
 				start_time: '',
 				latitude: '',
 				longitude: '',
-				id: '1318093163238662145',
+				id: '',
 			},
+			locationSearch: {},
 		};
 	},
+	computed: {
+		title() {
+			return this.otherInfo.id ? '修改巡检报告' : '填写巡检报告';
+		},
+	},
 	created() {
-		this.getOtherInfo();
-
-		if (this.otherInfo.id) {
-			this.getPreviewData();
-		} else {
-			this.getComponentsTypeData();
+		this.locationSearch = queryString.parse('?' + location.href.split('?')[1]);
+		// url中必须有token
+		if ('token' in this.locationSearch) {
+			this.saveToken();
+			if ('id' in this.locationSearch) {
+				this.getPreviewData();
+			} else {
+				this.getComponentsTypeData();
+			}
 		}
 	},
 	methods: {
+		saveToken() {
+			sessionStorage.setItem('token', this.locationSearch.token);
+		},
 		/**
 		 * @description 点击导航左侧的返回按钮
 		 */
@@ -89,41 +100,36 @@ export default {
 				},
 			};
 			if (this.otherInfo.id) {
-				await updatePatrolRecord(params);
+				const {message} = await updatePatrolRecord(params);
+				this.$toast(message);
 			} else {
-				await addPatrolRecord(params);
+				const {message} = await addPatrolRecord(params);
+				this.$toast(message);
 			}
 		},
 
 		/**
-		 * @description
-		 */
-		getOtherInfo() {
-			this.otherInfo.category_code = 'PC200-5000';
-			this.otherInfo.template_version = 1;
-		},
-		/**
 		 * @description 获取组件
 		 */
 		async getComponentsTypeData() {
-			const {data} = await getComponentsTypeApi({
-				categoryCode: this.otherInfo.category_code,
-				template_version: this.otherInfo.template_version,
+			const {result} = await getComponentsTypeApi({
+				categoryCode: this.locationSearch.category_code,
+				template_version: this.locationSearch.template_version,
 			});
+			const {data} = result;
 			this.checkGroup = data.check_group;
 			this.baseInfo = data.base_info;
-			this.getBaseInfoData();
-		},
-		/**
-		 * @description 获取基础数据
-		 */
-		getBaseInfoData() {
 			this.setBaseinfo();
 		},
+
 		/**
-		 * @description 通过url中获取baseInfo.
+		 * @description 通过url中的数据为baseInfo赋值.
 		 */
-		setBaseinfo() {},
+		setBaseinfo() {
+			this.baseInfo.elements.forEach((item) => {
+				item.value = this.locationSearch[item.name] || '';
+			});
+		},
 		/**
 		 * @description 点击提交时需要获取当前定位
 		 */
@@ -146,9 +152,10 @@ export default {
 		 * @description 获取要修改的数据
 		 */
 		async getPreviewData() {
-			const {category_code, id, latitude, longitude, start_time, template_version, data} = await getPatrolRecord({
-				id: this.id,
+			const res = await getPatrolRecord({
+				id: this.locationSearch.id,
 			});
+			const {category_code, id, latitude, longitude, start_time, template_version, data} = res.result;
 			this.otherInfo = {
 				category_code,
 				id,

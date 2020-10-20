@@ -1,18 +1,21 @@
 import axios from 'axios';
 import qs from 'qs';
 import {Toast} from 'vant';
-import {baseURL} from '../../config';
+import {baseURL} from '../config';
+
+// 开发过程中token可以在此页面写死。
+
 // 生成axios 实例 保证axios
 const axiosInstance = axios.create({
 	baseURL: baseURL,
 	timeout: 30 * 1000,
-	// headers: {'X-Access-Token': token},
 });
 
 // 添加请求拦截器
 axiosInstance.interceptors.request.use(
 	function(config) {
 		// 在发送请求之前做些什么
+		config.headers['X-Access-Token'] = sessionStorage.getItem('token');
 		return config;
 	},
 	function(error) {
@@ -28,7 +31,7 @@ axiosInstance.interceptors.response.use(
 		if (response.data.code !== 200) {
 			Toast(response.data.message);
 		} else {
-			return response.data.result;
+			return response.data;
 		}
 	},
 	function(error) {

@@ -1,6 +1,6 @@
 <template>
 	<section>
-		<van-nav-bar title="巡检报告" left-text="返回" left-arrow @click-left="handleClickLeft" />
+		<van-nav-bar v-if="showTitleBar" title="巡检报告" left-text="返回" left-arrow @click-left="handleClickLeft" />
 		<div class="base_info">
 			<van-cell-group>
 				<van-cell title="巡检编号" :value="previewData.category_code" />
@@ -54,6 +54,7 @@
 </template>
 
 <script>
+import queryString from 'query-string';
 import {getPatrolRecord} from '../api';
 import VideoShow from '../components/VideoShow.vue';
 export default {
@@ -66,6 +67,8 @@ export default {
 			previewData: {},
 			curMediaData: [],
 			show: false,
+			showTitleBar: true,
+			locationSearch: {},
 		};
 	},
 	computed: {
@@ -178,19 +181,29 @@ export default {
 			}
 		},
 	},
-	mounted() {
-		this.getPreviewData();
+	created() {
+		this.locationSearch = queryString.parse('?' + location.href.split('?')[1]);
+		if ('showTitleBar' in this.locationSearch) {
+			this.showTitleBar = Number(this.locationSearch.showTitleBar);
+		}
+		if ('token' in this.locationSearch) {
+			this.saveToken();
+			this.getPreviewData();
+		}
 	},
+
 	methods: {
+		saveToken() {
+			sessionStorage.setItem('token', this.locationSearch.token);
+		},
 		handleClickLeft() {},
 		async getPreviewData() {
-			const res = await getPatrolRecord({
-				id: '1318093163238662145',
+			const {result} = await getPatrolRecord({
+				id: this.locationSearch.id,
 			});
-			this.previewData = res;
+			this.previewData = result;
 		},
 		handlePreviewMedia(mediaData) {
-			console.log(mediaData);
 			this.curMediaData = mediaData.map((item) => {
 				if (item.thumbnail) {
 					return {

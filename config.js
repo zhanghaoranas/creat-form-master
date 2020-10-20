@@ -1,4 +1,0 @@
-const token =
-	'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJhdWQiOlsiQXV0aG9yaXphdGlvblNlcnZlciJdLCJ1c2VyX25hbWUiOiJhZG1pbiIsInNjb3BlIjpbImFwaSJdLCJncm91cGlkIjoidHlfb2F1dGhfaGJ4cyIsImV4cCI6MTYwMzA3NTIwNywianRpIjoiOGQ0MmE1YjgtYzc0OC00MjQ4LThkMGMtNGJkM2YxNzA4NmE5IiwiY2xpZW50X2lkIjoiY2xpZW50X3Bhc3NfMSIsInVzZXJuYW1lIjoiYWRtaW4ifQ.BNEPZxRUsA8NV-0_zdvR4A1LOFwaFCxTfhM5tK93RLo';
-const baseURL = '/jeecg-boot/patrol';
-export {token, baseURL};

@@ -12,9 +12,10 @@
     "core-js": "^3.6.5",
     "image-conversion": "^2.1.1",
     "qs": "^6.9.4",
-    "vant": "^2.10.9",
+    "query-string": "^6.13.6",
+    "vant": "^2.10.10",
     "vue": "^2.6.11",
-    "vue-router": "^3.2.0"
+    "vue-router": "^3.4.7"
   },
   "devDependencies": {
     "@vue/cli-plugin-babel": "~4.5.0",

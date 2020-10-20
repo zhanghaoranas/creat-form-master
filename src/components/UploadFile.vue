@@ -126,17 +126,18 @@ export default {
 		 * @description 上传文件
 		 */
 		async uploadFile(file) {
-			let result;
+			let res;
 			const config = {
 				headers: {'Content-Type': 'multipart/form-data'},
 			};
 			const forms = new FormData();
 			forms.append('uploadFiles', file);
 			if (this.isImg) {
-				result = await uploadPatrolImage(forms, config);
+				res = await uploadPatrolImage(forms, config);
 			} else {
-				result = await uploadPatrolVideo(forms, config);
+				res = await uploadPatrolVideo(forms, config);
 			}
+			const {result} = res;
 			file.status = 'done';
 			file.message = '';
 			// 多个上传的value为数组，单个上传的为 sting.
