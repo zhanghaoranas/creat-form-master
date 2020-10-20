@@ -22,6 +22,7 @@
 
 <script>
 import {getComponentsTypeApi, addPatrolRecord} from '../api/index';
+import {formatTime} from '../utils';
 import FormItem from '../components/FormItem.vue';
 export default {
 	name: 'home',
@@ -33,12 +34,16 @@ export default {
 			title: '填写巡检报告',
 			baseInfo: {},
 			checkGroup: [],
+			otherInfo: {
+				category_code: '',
+				template_version: 1,
+				start_time: '',
+			},
 		};
 	},
 	created() {
-		// setTimeout(() => {
+		this.getOtherInfo();
 		this.getComponentsTypeData();
-		// },1000)
 	},
 	methods: {
 		/**
@@ -49,19 +54,33 @@ export default {
 		 * @description 点击导航右侧的保存按钮
 		 */
 		async handleClickRight() {
-			const location = await this.getLocation();
+			const {latitude, longitude} = await this.getLocation();
+			this.otherInfo.start_time = formatTime(new Date());
 			const params = {
-				...location,
+				...this.otherInfo,
+				latitude,
+				longitude,
+				data: {
+					base_info: this.baseInfo,
+					check_group: this.checkGroup,
+				},
 			};
 			await addPatrolRecord(params);
+		},
+		/**
+		 * @description
+		 */
+		getOtherInfo() {
+			this.otherInfo.category_code = 'PC200-5000';
+			this.otherInfo.template_version = 1;
 		},
 		/**
 		 * @description 获取组件
 		 */
 		async getComponentsTypeData() {
 			const {data} = await getComponentsTypeApi({
-				categoryCode: 'PC200-5000',
-				template_version: 1,
+				categoryCode: this.otherInfo.category_code,
+				template_version: this.otherInfo.template_version,
 			});
 			this.checkGroup = data.check_group;
 			this.baseInfo = data.base_info;
@@ -81,7 +100,7 @@ export default {
 		 * @description 点击提交时需要获取当前定位
 		 */
 		getLocation() {
-			return Promise((resolve, reject) => {
+			return new Promise((resolve, reject) => {
 				navigator.geolocation.getCurrentPosition(
 					({coords}) => {
 						resolve(coords);

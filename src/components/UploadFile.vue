@@ -2,17 +2,26 @@
 	<div class="upload_file">
 		<van-uploader
 			v-model="fileList"
+			:accept="accept"
 			:before-read="beforeRead"
 			:max-count="maxCount"
 			:after-read="afterRead"
 			@delete="handleDelete"
-		/>
+		>
+			<template #preview-cover="{url}" v-if="!isImg">
+				<div class="preview_cover">
+					<video :src="url" @click="handlePreviewVideo"></video>
+				</div>
+			</template>
+		</van-uploader>
 	</div>
 </template>
 
 <script>
+import imageConversion from 'image-conversion';
 import formItemMixin from '../mixin/index';
 import {uploadPatrolImage, uploadPatrolVideo} from '../api/index';
+import {changeImgSize} from '../utils';
 export default {
 	name: 'upload-file',
 	mixins: [formItemMixin],
@@ -26,61 +35,83 @@ export default {
 			return !(this.elementData.type.indexOf('single') > -1);
 		},
 		isImg() {
-			return this.elementData.type.indexOf('video') > -1;
+			return this.elementData.type.indexOf('image') > -1;
 		},
 		maxCount() {
 			return this.isMulti ? 3 : 1;
 		},
+		accept() {
+			return this.isImg ? 'image/*' : 'video/*';
+		},
 	},
-	created() {},
 	methods: {
+		/**
+		 * @description 上传前的格式验证
+		 */
 		beforeRead(file) {
 			if (this.isImg) {
+				if (file.type.indexOf('image') > -1) {
+					return true;
+				}
+				this.$toast('请上传图片');
+				return false;
 			} else {
+				if (file.type.indexOf('video') > -1) {
+					return true;
+				}
+				this.$toast('请上传视频');
+				return false;
 			}
 		},
 		/**
-		 * @description 通过file对象可以自行将文件上传
+		 * @description 对file进行预处理
 		 */
 		async afterRead(file) {
+			const limtSize = 1024 * 1024;
 			file.status = 'uploading';
 			file.message = '上传中...';
-			let result;
 			if (this.isImg) {
-				// 进行图片压缩
-				result = await uploadPatrolImage({
-					uploadFiles: file,
-				});
+				const fileBlob = await changeImgSize(file.file);
+				if (fileBlob.size > limtSize) {
+					const res = await imageConversion.compressAccurately(fileBlob, 90);
+					this.uploadFile(res);
+				} else {
+					this.uploadFile(fileBlob);
+				}
 			} else {
-				result = await uploadPatrolVideo({
-					uploadFiles: file,
-				});
+				this.uploadFile(file.file);
+			}
+		},
+		/**
+		 * @description 上传文件
+		 */
+		async uploadFile(file) {
+			let result;
+			const config = {
+				headers: {'Content-Type': 'multipart/form-data'},
+			};
+			const forms = new FormData();
+			forms.append('uploadFiles', file);
+			if (this.isImg) {
+				result = await uploadPatrolImage(forms, config);
+			} else {
+				result = await uploadPatrolVideo(forms, config);
 			}
 			file.status = 'done';
 			file.message = '';
 			// 多个上传的value为数组，单个上传的为 sting.
 			if (this.isMulti) {
-				// 图片和视频的返回格式有出入。
-				if (this.isImg) {
-					this.elementData.value.push(result[0].original);
-				} else {
-					this.elementData.value.push(result[0]);
-				}
+				this.elementData.value.push(result[0]);
 				this.fileList = this.elementData.value.map((item) => {
 					return {
-						url: item,
+						url: this.$addSrcPrefix(item.original ? item.original : item),
 					};
 				});
 			} else {
-				if (this.isImg) {
-					this.elementData.value = result[0].original;
-				} else {
-					this.elementData.value = result[0];
-				}
-
+				this.elementData.value = result[0];
 				this.fileList = [
 					{
-						url: result[0].original,
+						url: this.$addSrcPrefix(result[0].original ? result[0].original : result[0]),
 					},
 				];
 			}
@@ -95,6 +126,9 @@ export default {
 				this.elementData.value = '';
 			}
 		},
+		handlePreviewVideo() {
+			this.$toast('视频不能预览');
+		},
 	},
 };
 </script>
@@ -103,5 +137,14 @@ export default {
 .upload_file {
 	padding: 8px 16px 0;
 	border-bottom: 1px solid #ebedf0;
+}
+.preview_cover {
+	width: 100%;
+	height: 100%;
+	> video {
+		width: 100%;
+		height: 100%;
+		object-fit: cover;
+	}
 }
 </style>

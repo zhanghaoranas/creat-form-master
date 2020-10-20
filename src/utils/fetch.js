@@ -1,11 +1,12 @@
 import axios from 'axios';
 import qs from 'qs';
-import {baseURL, token} from '../../config';
+import {Toast} from 'vant';
+import {baseURL} from '../../config';
 // 生成axios 实例 保证axios
 const axiosInstance = axios.create({
 	baseURL: baseURL,
-	timeout: 5000,
-	headers: {'X-Access-Token': token},
+	timeout: 30 * 1000,
+	// headers: {'X-Access-Token': token},
 });
 
 // 添加请求拦截器
@@ -24,7 +25,11 @@ axiosInstance.interceptors.request.use(
 axiosInstance.interceptors.response.use(
 	function(response) {
 		// 对响应数据做点什么
-		return response.data.result;
+		if (response.data.code !== 200) {
+			Toast(response.data.message);
+		} else {
+			return response.data.result;
+		}
 	},
 	function(error) {
 		// 对响应错误做点什么

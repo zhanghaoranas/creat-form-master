@@ -17,10 +17,11 @@ import {
 	Overlay,
 	Swipe,
 	SwipeItem,
+	Toast,
+	Icon,
 } from 'vant';
 import App from './App.vue';
 import router from './router';
-
 /**
 if (process.env.NODE_ENV === 'development') {
 	// 不要使用 import() 要不然是按需引入，会先请求之后引入mock😂
@@ -46,7 +47,19 @@ Vue.use(Button)
 	.use(Tabs)
 	.use(Overlay)
 	.use(Swipe)
-	.use(SwipeItem);
+	.use(SwipeItem)
+	.use(Toast)
+	.use(Icon);
+/**
+ *
+ * @description 为图片或视频路径添加统一的前缀。
+ * @param {*} src
+ * @param {*} prefix
+ */
+Vue.prototype.$addSrcPrefix = (src, prefix = '/jeecg-boot') => {
+	return prefix + src;
+};
+
 new Vue({
 	router,
 	render: (h) => h(App),

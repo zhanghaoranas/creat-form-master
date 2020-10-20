@@ -28,11 +28,11 @@
 						v-if="component.imgUrl.length"
 						@click="handlePreviewMedia([...component.imgUrl, ...component.videoUrl])"
 					>
-						<img :src="component.imgUrl[0].thumbnail" alt="" />
+						<img :src="$addSrcPrefix(component.imgUrl[0].thumbnail)" alt="" />
 						<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
 					</div>
 					<div class="media_area" v-else-if="component.videoUrl.length">
-						<video :src="component.videoUrl[0]"></video>
+						<video :src="$addSrcPrefix(component.videoUrl[0])"></video>
 						<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
 					</div>
 				</div>
@@ -43,8 +43,8 @@
 				<van-swipe class="my-swipe">
 					<van-swipe-item v-for="(item, index) in curMediaData" :key="index">
 						<div class="show_media_box">
-							<img v-if="item.type === 'image'" :src="item.url" alt="" />
-							<video controls v-else :src="item.url" @click.stop></video>
+							<img v-if="item.type === 'image'" :src="$addSrcPrefix(item.url)" alt="" />
+							<video-show v-else :url="$addSrcPrefix(item.url)"></video-show>
 						</div>
 					</van-swipe-item>
 				</van-swipe>
@@ -54,248 +54,245 @@
 </template>
 
 <script>
-	import {getPatrolRecord} from '../api';
-	export default {
-		name: 'preview',
-		data() {
-			return {
-				previewData: {},
-				curMediaData: [],
-				show: false,
-			};
+import {getPatrolRecord} from '../api';
+import VideoShow from '../components/VideoShow.vue';
+export default {
+	name: 'preview',
+	components: {
+		VideoShow,
+	},
+	data() {
+		return {
+			previewData: {},
+			curMediaData: [],
+			show: false,
+		};
+	},
+	computed: {
+		equipmentInfo() {
+			if (this.previewData.data) {
+				return this.previewData.data.base_info.elements;
+			} else {
+				return [];
+			}
 		},
-		computed: {
-			equipmentInfo() {
-				if (this.previewData.data) {
-					return this.previewData.data.base_info.elements;
-				} else {
-					return [];
-				}
-			},
-			groupInfo() {
-				if (this.previewData.data) {
-					// 对返回的数据进行处理。
-					return this.previewData.data.check_group.map((group) => {
-						return {
-							...group,
-							components: {
-								...group.components.map((component) => {
-									return {
-										...component,
-										label: component.elements
-											.filter((element) => {
-												return !(
-													element.type === 'singleimage' ||
-													element.type === 'singlevideo' ||
-													element.type === 'multipleimage' ||
-													element.type === 'multiplevideo'
-												);
-											})
-											.reduce((pre, cur) => {
-												// 当value 是一个数组时（element.type === 'checkbox'）。
-												const labelArr = [];
-												const {value, options, name} = cur;
-												if (Array.isArray(value)) {
-													if (value.length !== 0) {
-														const checkboxVal = [];
-														value.forEach((i) => {
-															options.forEach((j) => {
-																if (i == j.id) {
-																	checkboxVal.push(j.name);
-																}
-															});
-														});
-														labelArr.push(checkboxVal);
-													}
-												} else {
-													if (value) {
-														if (options) {
-															options.forEach((j) => {
-																if (value === j.id) {
-																	labelArr.push(j.name);
-																}
-															});
-														} else {
-															if (name) {
-																labelArr.push(`${name}:${value}`);
+		groupInfo() {
+			if (this.previewData.data) {
+				// 对返回的数据进行处理。
+				return this.previewData.data.check_group.map((group) => {
+					return {
+						...group,
+						components: {
+							...group.components.map((component) => {
+								return {
+									...component,
+									label: component.elements
+										.filter((element) => {
+											return !(
+												element.type === 'singleimage' ||
+												element.type === 'singlevideo' ||
+												element.type === 'multipleimage' ||
+												element.type === 'multiplevideo'
+											);
+										})
+										.reduce((pre, cur) => {
+											// 当value 是一个数组时（element.type === 'checkbox'）。
+											const labelArr = [];
+											const {value, options, name} = cur;
+											if (Array.isArray(value)) {
+												if (value.length !== 0) {
+													const checkboxVal = [];
+													value.forEach((i) => {
+														options.forEach((j) => {
+															if (i == j.id) {
+																checkboxVal.push(j.name);
 															}
+														});
+													});
+													labelArr.push(checkboxVal);
+												}
+											} else {
+												if (value) {
+													if (options) {
+														options.forEach((j) => {
+															if (value === j.id) {
+																labelArr.push(j.name);
+															}
+														});
+													} else {
+														if (name) {
+															labelArr.push(`${name}:${value}`);
 														}
 													}
 												}
-												return pre.concat(labelArr);
-											}, []),
-										imgUrl: component.elements
-											.filter(
-												(element) =>
-													element.type === 'singleimage' || element.type === 'multipleimage'
-											)
-											.reduce((pre, cur) => {
-												const imgUrlArr = [];
-												const {value} = cur;
-												if (Array.isArray(value)) {
-													if (value.length !== 0) {
-														imgUrlArr.push(...value);
-													}
-												} else {
-													// 排除是空对象的
-													if (Object.keys(value).length !== 0) {
-														imgUrlArr.push(value);
-													}
+											}
+											return pre.concat(labelArr);
+										}, []),
+									imgUrl: component.elements
+										.filter(
+											(element) =>
+												element.type === 'singleimage' || element.type === 'multipleimage'
+										)
+										.reduce((pre, cur) => {
+											const imgUrlArr = [];
+											const {value} = cur;
+											if (Array.isArray(value)) {
+												if (value.length !== 0) {
+													imgUrlArr.push(...value);
 												}
-												return pre.concat(imgUrlArr);
-											}, []),
-										videoUrl: component.elements
-											.filter(
-												(element) =>
-													element.type === 'singlevideo' || element.type === 'multiplevideo'
-											)
-											.reduce((pre, cur) => {
-												const imgUrlArr = [];
-												const {value} = cur;
-												if (Array.isArray(value)) {
-													if (value.length !== 0) {
-														imgUrlArr.push(...value);
-													}
-												} else {
-													// 排除是空对象的
-													if (Object.keys(value).length !== 0) {
-														imgUrlArr.push(value);
-													}
+											} else {
+												// 排除是空对象的
+												if (Object.keys(value).length !== 0) {
+													imgUrlArr.push(value);
 												}
-												return pre.concat(imgUrlArr);
-											}, []),
-									};
-								}),
-							},
-						};
-					});
+											}
+											return pre.concat(imgUrlArr);
+										}, []),
+									videoUrl: component.elements
+										.filter(
+											(element) =>
+												element.type === 'singlevideo' || element.type === 'multiplevideo'
+										)
+										.reduce((pre, cur) => {
+											const imgUrlArr = [];
+											const {value} = cur;
+											if (Array.isArray(value)) {
+												if (value.length !== 0) {
+													imgUrlArr.push(...value);
+												}
+											} else {
+												// 排除是空对象的
+												if (Object.keys(value).length !== 0) {
+													imgUrlArr.push(value);
+												}
+											}
+											return pre.concat(imgUrlArr);
+										}, []),
+								};
+							}),
+						},
+					};
+				});
+			} else {
+				return [];
+			}
+		},
+	},
+	mounted() {
+		this.getPreviewData();
+	},
+	methods: {
+		handleClickLeft() {},
+		async getPreviewData() {
+			const res = await getPatrolRecord({
+				id: '1318093163238662145',
+			});
+			this.previewData = res;
+		},
+		handlePreviewMedia(mediaData) {
+			console.log(mediaData);
+			this.curMediaData = mediaData.map((item) => {
+				if (item.thumbnail) {
+					return {
+						url: item.original,
+						type: 'image',
+					};
 				} else {
-					return [];
+					return {
+						url: item,
+						type: 'video',
+					};
 				}
-			},
+			});
+			this.show = true;
 		},
-		mounted() {
-			this.getPreviewData();
-		},
-		methods: {
-			handleClickLeft() {},
-			async getPreviewData() {
-				const res = await getPatrolRecord({
-					id: 3216546,
-				});
-				this.previewData = res;
-			},
-			handlePreviewMedia(mediaData) {
-				console.log(mediaData);
-				this.curMediaData = mediaData.map((item) => {
-					if (item.thumbnail) {
-						return {
-							url: item.original,
-							type: 'image',
-						};
-					} else {
-						return {
-							url: item,
-							type: 'video',
-						};
-					}
-				});
-				console.log(this.curMediaData);
-				this.show = true;
-			},
-			imagePreviewChange(data) {
-				console.log(data);
-			},
-		},
-	};
+	},
+};
 </script>
 
 <style lang="less" scoped>
-	.base_info {
-		background-color: #fff;
-	}
-	.equipment_info {
+.base_info {
+	background-color: #fff;
+}
+.equipment_info {
+	display: flex;
+	flex-wrap: wrap;
+	text-align: center;
+	> div {
 		display: flex;
-		flex-wrap: wrap;
-		text-align: center;
-		> div {
-			display: flex;
-			flex-direction: column;
-			width: 33.3333%;
-			> span {
-				margin: -0.5px;
-				border: 0.5px solid #ebedf0;
-				line-height: 34px;
-			}
-		}
-	}
-	.equipment_info_value {
-		color: #969799;
-	}
-	.group_info {
-		background-color: #fff;
-		> h4 {
-			padding: 6px 16px;
-			margin-bottom: 0;
-			margin-top: 6px;
-		}
-	}
-	.component_info {
-		padding: 6px 16px;
-		border-top: 1px solid #ebedf0;
-		> div {
-			display: flex;
-			justify-content: space-between;
-		}
-	}
-	.info_title {
-		margin: 6px 0;
-	}
-	.info_list {
-		font-size: 14px;
-		color: #969799;
-		> li {
-			height: 24px;
-		}
-	}
-	.media_area {
-		width: 120px;
-		height: 80px;
-		border: 0.5px solid #ebedf0;
-		border-radius: 4px;
-		align-self: flex-end;
-		overflow: hidden;
-		position: relative;
-		> img {
-			height: 100%;
-			width: 100%;
-		}
-		> video {
-			height: 120px;
-			width: 80px;
-		}
+		flex-direction: column;
+		width: 33.3333%;
 		> span {
-			font-size: 14px;
-			background-color: #f2f3f5;
-			padding: 0 6px;
-			position: absolute;
-			bottom: 0;
-			right: 0;
+			margin: -0.5px;
+			border: 0.5px solid #ebedf0;
+			line-height: 34px;
 		}
 	}
-	.wrapper {
-		height: 100%;
+}
+.equipment_info_value {
+	color: #969799;
+}
+.group_info {
+	background-color: #fff;
+	> h4 {
+		padding: 6px 16px;
+		margin-bottom: 0;
+		margin-top: 6px;
 	}
-	.show_media_box {
-		width: 100%;
-		height: 100vh;
+}
+.component_info {
+	padding: 6px 16px;
+	border-top: 1px solid #ebedf0;
+	> div {
 		display: flex;
-		align-items: center;
-		> img {
-			width: 100%;
-		}
-		> video {
-			width: 100%;
-		}
+		justify-content: space-between;
 	}
+}
+.info_title {
+	margin: 6px 0;
+}
+.info_list {
+	font-size: 14px;
+	color: #969799;
+	> li {
+		height: 24px;
+	}
+}
+.media_area {
+	width: 120px;
+	height: 80px;
+	border: 0.5px solid #ebedf0;
+	border-radius: 4px;
+	align-self: flex-end;
+	overflow: hidden;
+	position: relative;
+	> img {
+		height: 100%;
+		width: 100%;
+	}
+	> video {
+		height: 120px;
+		width: 80px;
+	}
+	> span {
+		font-size: 14px;
+		background-color: #f2f3f5;
+		padding: 0 6px;
+		position: absolute;
+		bottom: 0;
+		right: 0;
+	}
+}
+.wrapper {
+	height: 100%;
+}
+.show_media_box {
+	width: 100%;
+	height: 100vh;
+	display: flex;
+	align-items: center;
+	> img {
+		width: 100%;
+	}
+}
 </style>

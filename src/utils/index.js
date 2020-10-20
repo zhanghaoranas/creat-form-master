@@ -30,5 +30,70 @@ function formatTime(time, cFormat = '{y}-{m}-{d}') {
 		return value || 0;
 	});
 }
+/**
+ *
+ * @description 将图片等比缩放到某一特定的尺寸 默认为 1080
+ * @param {Blob} file
+ * @param {Number} maxSize
+ */
+function changeImgSize(file, maxSize = 1080) {
+	// eslint-disable-next-line no-unused-vars
+	return new Promise((resolve, reject) => {
+		blobToUrl(file).then((url) => {
+			const image = new Image();
+			image.src = url;
+			image.onload = () => {
+				const imageWidth = image.width;
+				const imageHeight = image.height;
+				const WH_Ratio = imageWidth / imageHeight; // 图片的宽高比例
+				const canvas = document.createElement('canvas');
+				const ctx = canvas.getContext('2d');
+				let zoomRatio;
+				// 定义 canvas 大小，也就是压缩后下载的图片大小
 
-export { formatTime };
+				if (WH_Ratio > 1) {
+					zoomRatio = imageWidth / maxSize;
+					canvas.width = maxSize;
+					canvas.height = imageHeight / zoomRatio;
+				} else {
+					zoomRatio = imageHeight / maxSize;
+					canvas.height = maxSize;
+					canvas.width = imageWidth / zoomRatio;
+				}
+				ctx.drawImage(image, 0, 0, canvas.width, canvas.height);
+				return resolve(convertBase64UrlToBlob(canvas.toDataURL('image/jpeg', 1)));
+			};
+		});
+	});
+}
+/**
+ *
+ * @description Base64ToBlob
+ * @param {Base64} urlData
+ */
+function convertBase64UrlToBlob(urlData) {
+	var arr = urlData.split(','),
+		mime = arr[0].match(/:(.*?);/)[1],
+		bstr = atob(arr[1]),
+		n = bstr.length,
+		u8arr = new Uint8Array(n);
+	console.log(arr);
+	while (n--) {
+		u8arr[n] = bstr.charCodeAt(n);
+	}
+	return new Blob([u8arr], {type: mime});
+}
+/**
+ * @param {Blob} blob
+ */
+function blobToUrl(blob) {
+	// eslint-disable-next-line no-unused-vars
+	return new Promise((resolve, reject) => {
+		const reader = new FileReader();
+		reader.readAsDataURL(blob);
+		reader.onload = (event) => {
+			resolve(event.target.result);
+		};
+	});
+}
+export {formatTime, changeImgSize};
