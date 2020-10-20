@@ -1107,6 +1107,11 @@
   resolved "https://registry.npm.taobao.org/@vant/icons/download/@vant/icons-1.3.2.tgz?cache=0&sync_timestamp=1602681732484&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2F%40vant%2Ficons%2Fdownload%2F%40vant%2Ficons-1.3.2.tgz#f0930010e7aaa9b06b03636fe9b5bc6477ea224b"
   integrity sha1-8JMAEOeqqbBrA2Nv6bW8ZHfqIks=
 
+"@vant/touch-emulator@^1.2.0":
+  version "1.2.0"
+  resolved "https://registry.npm.taobao.org/@vant/touch-emulator/download/@vant/touch-emulator-1.2.0.tgz#486300b23e57db9ce9231a04e0a0c621c68692d8"
+  integrity sha1-SGMAsj5X25zpIxoE4KDGIcaGktg=
+
 "@vue/babel-helper-vue-jsx-merge-props@^1.0.0":
   version "1.0.0"
   resolved "https://registry.npm.taobao.org/@vue/babel-helper-vue-jsx-merge-props/download/@vue/babel-helper-vue-jsx-merge-props-1.0.0.tgz#048fe579958da408fb7a8b2a3ec050b50a661040"
