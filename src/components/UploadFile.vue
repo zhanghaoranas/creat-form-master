@@ -44,7 +44,47 @@ export default {
 			return this.isImg ? 'image/*' : 'video/*';
 		},
 	},
+	created() {
+		this.getShowList();
+	},
 	methods: {
+		/**
+		 * @description 获取回显数据
+		 */
+		getShowList() {
+			const {value} = this.elementData;
+			let showList;
+			if (this.isImg) {
+				if (this.isMulti) {
+					showList = value.map((item) => {
+						return {
+							url: this.$addSrcPrefix(item.original),
+						};
+					});
+				} else {
+					showList = [
+						{
+							url: this.$addSrcPrefix(value.original),
+						},
+					];
+				}
+			} else {
+				if (this.isMulti) {
+					showList = value.map((item) => {
+						return {
+							url: this.$addSrcPrefix(item),
+						};
+					});
+				} else {
+					showList = [
+						{
+							url: this.$addSrcPrefix(value),
+						},
+					];
+				}
+			}
+			this.fileList = showList.filter((item) => item.url);
+		},
 		/**
 		 * @description 上传前的格式验证
 		 */

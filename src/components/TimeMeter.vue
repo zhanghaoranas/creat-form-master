@@ -25,6 +25,9 @@ export default {
 			return this.timeData / 1000;
 		},
 	},
+	created() {
+		this.timeData = this.elementData.value * 1000;
+	},
 	beforeDestroy() {
 		cancelAnimationFrame(this.animationFrame);
 	},

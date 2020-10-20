@@ -57,7 +57,10 @@ Vue.use(Button)
  * @param {*} prefix
  */
 Vue.prototype.$addSrcPrefix = (src, prefix = '/jeecg-boot') => {
-	return prefix + src;
+	if (src) {
+		return prefix + src;
+	}
+	return '';
 };
 
 new Vue({

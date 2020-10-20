@@ -5,5 +5,13 @@ const uploadPatrolImage = (params, config) => fetchPost('/fileUpload/uploadPatro
 const uploadPatrolVideo = (params, config) => fetchPost('/fileUpload/uploadPatrolVideo', params, config); // 上传视频
 const addPatrolRecord = (params, config) => fetchPost('/patrolRecord/addPatrolRecord', params, config); // 上传表单
 const getPatrolRecord = (params, config) => fetchPost('/patrolRecord/getPatrolRecord', params, config); // 预览
+const updatePatrolRecord = (params, config) => fetchPost('/patrolRecord/updatePatrolRecord', params, config); // 修改
 
-export {getComponentsTypeApi, uploadPatrolImage, uploadPatrolVideo, addPatrolRecord, getPatrolRecord};
+export {
+	getComponentsTypeApi,
+	uploadPatrolImage,
+	uploadPatrolVideo,
+	addPatrolRecord,
+	getPatrolRecord,
+	updatePatrolRecord,
+};
