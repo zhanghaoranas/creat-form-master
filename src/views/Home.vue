@@ -86,12 +86,18 @@ export default {
 		 * @description 点击导航右侧的保存按钮
 		 */
 		async handleClickRight() {
+			console.log(11);
 			if (!this.otherInfo.id) {
-				const {latitude, longitude} = await this.getLocation();
-				this.otherInfo.start_time = formatTime(new Date());
-				this.otherInfo.category_code = this.locationSearch.category_code;
-				this.otherInfo.latitude = latitude;
-				this.otherInfo.longitude = longitude;
+				try {
+					const {latitude, longitude} = await this.getLocation();
+					this.otherInfo.latitude = latitude;
+					this.otherInfo.longitude = longitude;
+				} catch (err) {
+					console.log(err);
+				} finally {
+					this.otherInfo.start_time = formatTime(new Date());
+					this.otherInfo.category_code = this.locationSearch.category_code;
+				}
 			}
 			const params = {
 				...this.otherInfo,
