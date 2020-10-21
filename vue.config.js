@@ -4,7 +4,7 @@ module.exports = {
 		disableHostCheck: true,
 		proxy: {
 			'/jeecg-boot': {
-				target: 'http://192.168.18.187:8080',
+				target: 'http://192.168.30.146:8098',
 				changeOrigin: true,
 			},
 		},

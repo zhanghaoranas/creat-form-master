@@ -89,6 +89,7 @@ export default {
 			if (!this.otherInfo.id) {
 				const {latitude, longitude} = await this.getLocation();
 				this.otherInfo.start_time = formatTime(new Date());
+				this.otherInfo.category_code = this.locationSearch.category_code;
 				this.otherInfo.latitude = latitude;
 				this.otherInfo.longitude = longitude;
 			}

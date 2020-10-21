@@ -7,6 +7,7 @@
 				:key="item.id"
 				:name="item.id"
 				icon-size="16px"
+				shape="square"
 			>
 				{{ item.name }}
 			</van-checkbox>

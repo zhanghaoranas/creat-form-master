@@ -180,6 +180,7 @@ export default {
 	border-bottom: 1px solid #ebedf0;
 }
 .preview_cover {
+	overflow: hidden;
 	width: 100%;
 	height: 100%;
 	> video {
