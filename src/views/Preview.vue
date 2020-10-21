@@ -40,11 +40,17 @@
 		</div>
 		<van-overlay :show="show" @click="show = false">
 			<div class="wrapper">
-				<van-swipe class="my-swipe">
-					<van-swipe-item v-for="(item, index) in curMediaData" :key="index">
+				<van-swipe ref="swipe">
+					<van-swipe-item class="preview_swipe_item" v-for="(item, index) in curMediaData" :key="index">
 						<div class="show_media_box">
 							<img v-if="item.type === 'image'" :src="$addSrcPrefix(item.url)" alt="" />
 							<video-show v-else :url="$addSrcPrefix(item.url)"></video-show>
+						</div>
+						<div v-if="!showTitleBar" class="arrow arrow_left" @click.stop="handleSwipeChange(-1)">
+							<van-icon name="arrow-left" size="36" color="#000" />
+						</div>
+						<div v-if="!showTitleBar" class="arrow arrow_right" @click.stop="handleSwipeChange(1)">
+							<van-icon name="arrow" size="36" color="#000" />
 						</div>
 					</van-swipe-item>
 				</van-swipe>
@@ -219,6 +225,14 @@ export default {
 			});
 			this.show = true;
 		},
+		handleSwipeChange(index) {
+			const swipe = this.$refs.swipe;
+			if (index > 0) {
+				swipe.prev();
+			} else {
+				swipe.next();
+			}
+		},
 	},
 };
 </script>
@@ -306,6 +320,25 @@ export default {
 	align-items: center;
 	> img {
 		width: 100%;
+		max-height: 100%;
+		object-fit: contain;
 	}
+}
+.preview_swipe_item {
+	position: relative;
+}
+.arrow {
+	position: absolute;
+	top: 50%;
+	margin-top: -18px;
+	z-index: 2;
+	width: 36px;
+	height: 36px;
+}
+.arrow_left {
+	left: 10%;
+}
+.arrow_right {
+	right: 10%;
 }
 </style>

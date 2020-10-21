@@ -20,7 +20,7 @@ import {
 	Toast,
 	Icon,
 } from 'vant';
-import '@vant/touch-emulator'; // 用于桌面端使用😂
+
 import App from './App.vue';
 import router from './router';
 /**
