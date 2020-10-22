@@ -19,6 +19,7 @@ import {
 	SwipeItem,
 	Toast,
 	Icon,
+	Empty,
 } from 'vant';
 
 import App from './App.vue';
@@ -50,7 +51,8 @@ Vue.use(Button)
 	.use(Swipe)
 	.use(SwipeItem)
 	.use(Toast)
-	.use(Icon);
+	.use(Icon)
+	.use(Empty);
 /**
  *
  * @description 为图片或视频路径添加统一的前缀。

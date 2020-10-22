@@ -1,32 +1,32 @@
 <template>
 	<section>
-		<van-nav-bar
-			:title="title"
-			right-text="按钮"
-			fixed
-			placeholder
-			@click-left="handleClickLeft"
-			@click-right="handleClickRight"
-		>
-			<template #right>
+		<van-nav-bar :title="title" fixed placeholder @click-left="handleClickLeft" @click-right="handleClickRight">
+			<template #right v-if="noError">
 				<van-button type="primary" size="mini"> 保存 </van-button>
 			</template>
 		</van-nav-bar>
-		<div>
-			<input-main v-for="(element, index) in baseInfo.elements" :key="index" :elementData="element"></input-main>
+		<div v-if="noError">
+			<div>
+				<input-main
+					v-for="(element, index) in baseInfo.elements"
+					:key="index"
+					:elementData="element"
+				></input-main>
+			</div>
+			<van-tabs sticky offset-top="46">
+				<van-tab v-for="item in checkGroup" :key="item.group_id" :title="item.group_name">
+					<div v-for="component in item.components" :key="component.component_id" class="check_item">
+						<h5>{{ component.component_name }}</h5>
+						<form-item
+							v-for="element in component.elements"
+							:key="element.id"
+							:componentData="element"
+						></form-item>
+					</div>
+				</van-tab>
+			</van-tabs>
 		</div>
-		<van-tabs sticky offset-top="46">
-			<van-tab v-for="item in checkGroup" :key="item.group_id" :title="item.group_name">
-				<div v-for="component in item.components" :key="component.component_id" class="check_item">
-					<h5>{{ component.component_name }}</h5>
-					<form-item
-						v-for="element in component.elements"
-						:key="element.id"
-						:componentData="element"
-					></form-item>
-				</div>
-			</van-tab>
-		</van-tabs>
+		<van-empty v-else image="error" description="数据错误,请检查传入的参数是否正确" />
 	</section>
 </template>
 
@@ -44,6 +44,7 @@ export default {
 	},
 	data() {
 		return {
+			noError: true,
 			baseInfo: {},
 			checkGroup: [],
 			otherInfo: {
@@ -67,11 +68,14 @@ export default {
 		// url中必须有token
 		if ('token' in this.locationSearch) {
 			this.saveToken();
+			this.otherInfo.start_time = formatTime(new Date(), '{y}-{m}-{d} {h}:{i}:{s}');
 			if ('id' in this.locationSearch) {
 				this.getPreviewData();
 			} else {
 				this.getComponentsTypeData();
 			}
+		} else {
+			this.noError = false;
 		}
 	},
 	methods: {
@@ -86,7 +90,6 @@ export default {
 		 * @description 点击导航右侧的保存按钮
 		 */
 		async handleClickRight() {
-			console.log(11);
 			if (!this.otherInfo.id) {
 				try {
 					const {latitude, longitude} = await this.getLocation();
@@ -95,7 +98,6 @@ export default {
 				} catch (err) {
 					console.log(err);
 				} finally {
-					this.otherInfo.start_time = formatTime(new Date());
 					this.otherInfo.category_code = this.locationSearch.category_code;
 				}
 			}
@@ -119,14 +121,18 @@ export default {
 		 * @description 获取组件
 		 */
 		async getComponentsTypeData() {
-			const {result} = await getComponentsTypeApi({
-				categoryCode: this.locationSearch.category_code,
-				template_version: this.locationSearch.template_version,
-			});
-			const {data} = result;
-			this.checkGroup = data.check_group;
-			this.baseInfo = data.base_info;
-			this.setBaseinfo();
+			try {
+				const {result} = await getComponentsTypeApi({
+					categoryCode: this.locationSearch.category_code,
+					template_version: this.locationSearch.template_version,
+				});
+				const {data} = result;
+				this.checkGroup = data.check_group;
+				this.baseInfo = data.base_info;
+				this.setBaseinfo();
+			} catch (error) {
+				this.noError = false;
+			}
 		},
 
 		/**
@@ -159,20 +165,25 @@ export default {
 		 * @description 获取要修改的数据
 		 */
 		async getPreviewData() {
-			const res = await getPatrolRecord({
-				id: this.locationSearch.id,
-			});
-			const {category_code, id, latitude, longitude, start_time, template_version, data} = res.result;
-			this.otherInfo = {
-				category_code,
-				id,
-				latitude,
-				longitude,
-				start_time,
-				template_version,
-			};
-			this.baseInfo = data.base_info;
-			this.checkGroup = data.check_group;
+			try {
+				const res = await getPatrolRecord({
+					id: this.locationSearch.id,
+				});
+				const {category_code, id, latitude, longitude, start_time, template_version, data} = res.result;
+				this.otherInfo = {
+					category_code,
+					id,
+					latitude,
+					longitude,
+					start_time,
+					template_version,
+				};
+				this.baseInfo = data.base_info;
+				this.checkGroup = data.check_group;
+			} catch (error) {
+				console.log(error);
+				this.noError = false;
+			}
 		},
 	},
 };

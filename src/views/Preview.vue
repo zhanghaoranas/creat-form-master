@@ -1,43 +1,46 @@
 <template>
 	<section>
 		<van-nav-bar v-if="showTitleBar" title="巡检报告" left-text="返回" left-arrow @click-left="handleClickLeft" />
-		<div class="base_info">
-			<van-cell-group>
-				<van-cell title="巡检编号" :value="previewData.category_code" />
-				<van-cell title="巡检时间" :value="previewData.start_time" />
-			</van-cell-group>
-			<div class="equipment_info">
-				<div v-for="(item, index) in equipmentInfo" :key="index">
-					<span>{{ item.title }}</span>
-					<span class="equipment_info_value">{{ item.value }}</span>
-				</div>
-			</div>
-		</div>
-		<div class="group_info" v-for="(group, index) in groupInfo" :key="index">
-			<h4>{{ group.group_name }}</h4>
-			<div class="component_info" v-for="(component, i) in group.components" :key="i">
-				<h5 class="info_title">{{ component.component_name }}</h5>
-				<div>
-					<ul class="info_list">
-						<li v-for="(item, j) in component.label" :key="j">
-							{{ Array.isArray(item) ? item.join() : item }}
-						</li>
-					</ul>
-					<div
-						class="media_area"
-						v-if="component.imgUrl.length"
-						@click="handlePreviewMedia([...component.imgUrl, ...component.videoUrl])"
-					>
-						<img :src="$addSrcPrefix(component.imgUrl[0].thumbnail)" alt="" />
-						<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
-					</div>
-					<div class="media_area" v-else-if="component.videoUrl.length">
-						<video :src="$addSrcPrefix(component.videoUrl[0])"></video>
-						<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
+		<div v-if="noError">
+			<div class="base_info">
+				<van-cell-group>
+					<van-cell title="巡检编号" :value="previewData.category_code" />
+					<van-cell title="巡检时间" :value="previewData.start_time" />
+				</van-cell-group>
+				<div class="equipment_info">
+					<div v-for="(item, index) in equipmentInfo" :key="index">
+						<span>{{ item.title }}</span>
+						<span class="equipment_info_value">{{ item.value }}</span>
 					</div>
 				</div>
 			</div>
+			<div class="group_info" v-for="(group, index) in groupInfo" :key="index">
+				<h4>{{ group.group_name }}</h4>
+				<div class="component_info" v-for="(component, i) in group.components" :key="i">
+					<h5 class="info_title">{{ component.component_name }}</h5>
+					<div>
+						<ul class="info_list">
+							<li v-for="(item, j) in component.label" :key="j">
+								{{ Array.isArray(item) ? item.join() : item }}
+							</li>
+						</ul>
+						<div
+							class="media_area"
+							v-if="component.imgUrl.length"
+							@click="handlePreviewMedia([...component.imgUrl, ...component.videoUrl])"
+						>
+							<img :src="$addSrcPrefix(component.imgUrl[0].thumbnail)" alt="" />
+							<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
+						</div>
+						<div class="media_area" v-else-if="component.videoUrl.length">
+							<video :src="$addSrcPrefix(component.videoUrl[0])"></video>
+							<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
+						</div>
+					</div>
+				</div>
+			</div>
 		</div>
+		<van-empty v-else image="error" description="数据错误,请检查传入的参数是否正确" />
 		<van-overlay :show="show" @click="show = false">
 			<div class="wrapper">
 				<van-swipe ref="swipe">
@@ -75,6 +78,7 @@ export default {
 			show: false,
 			showTitleBar: true,
 			locationSearch: {},
+			noError: true,
 		};
 	},
 	computed: {
@@ -204,10 +208,14 @@ export default {
 		},
 		handleClickLeft() {},
 		async getPreviewData() {
-			const {result} = await getPatrolRecord({
-				id: this.locationSearch.id,
-			});
-			this.previewData = result;
+			try {
+				const {result} = await getPatrolRecord({
+					id: this.locationSearch.id,
+				});
+				this.previewData = result;
+			} catch (error) {
+				this.noError = false;
+			}
 		},
 		handlePreviewMedia(mediaData) {
 			this.curMediaData = mediaData.map((item) => {

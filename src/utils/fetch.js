@@ -30,6 +30,7 @@ axiosInstance.interceptors.response.use(
 		// 对响应数据做点什么
 		if (response.data.code !== 200) {
 			Toast(response.data.message);
+			return Promise.reject(response.data.message);
 		} else {
 			return response.data;
 		}
