@@ -2,7 +2,7 @@
 	<section>
 		<van-nav-bar :title="title" fixed placeholder @click-left="handleClickLeft" @click-right="handleClickRight">
 			<template #right v-if="noError">
-				<van-button type="primary" size="mini"> 保存 </van-button>
+				<van-button type="primary" size="small"> 保存 </van-button>
 			</template>
 		</van-nav-bar>
 		<div v-if="noError">
