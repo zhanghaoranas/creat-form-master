@@ -11,7 +11,7 @@
 <script>
 	import formItemMixin from '../mixin/index';
 	export default {
-		name: 'input-text',
+		name: 'time-meter',
 		mixins: [formItemMixin],
 		data() {
 			return {
