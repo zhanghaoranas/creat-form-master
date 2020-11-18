@@ -32,7 +32,11 @@
 							<img :src="$addSrcPrefix(component.imgUrl[0].thumbnail)" alt="" />
 							<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
 						</div>
-						<div class="media_area" v-else-if="component.videoUrl.length">
+						<div
+							class="media_area"
+							v-else-if="component.videoUrl.length"
+							@click="handlePreviewMedia([...component.imgUrl, ...component.videoUrl])"
+						>
 							<video :src="$addSrcPrefix(component.videoUrl[0])"></video>
 							<span>{{ component.imgUrl.length + component.videoUrl.length }}张</span>
 						</div>
@@ -63,290 +67,290 @@
 </template>
 
 <script>
-import queryString from 'query-string';
-import {getPatrolRecord} from '../api';
-import VideoShow from '../components/VideoShow.vue';
-export default {
-	name: 'preview',
-	components: {
-		VideoShow,
-	},
-	data() {
-		return {
-			previewData: {},
-			curMediaData: [],
-			show: false,
-			showTitleBar: true,
-			locationSearch: {},
-			noError: true,
-		};
-	},
-	computed: {
-		equipmentInfo() {
-			if (this.previewData.data) {
-				return this.previewData.data.base_info.elements;
-			} else {
-				return [];
-			}
+	import queryString from 'query-string';
+	import {getPatrolRecord} from '../api';
+	import VideoShow from '../components/VideoShow.vue';
+	export default {
+		name: 'preview',
+		components: {
+			VideoShow,
 		},
-		groupInfo() {
-			if (this.previewData.data) {
-				// 对返回的数据进行处理。
-				return this.previewData.data.check_group.map((group) => {
-					return {
-						...group,
-						components: {
-							...group.components.map((component) => {
-								return {
-									...component,
-									label: component.elements
-										.filter((element) => {
-											return !(
-												element.type === 'singleimage' ||
-												element.type === 'singlevideo' ||
-												element.type === 'multipleimage' ||
-												element.type === 'multiplevideo'
-											);
-										})
-										.reduce((pre, cur) => {
-											// 当value 是一个数组时（element.type === 'checkbox'）。
-											const labelArr = [];
-											const {value, options, name} = cur;
-											if (Array.isArray(value)) {
-												if (value.length !== 0) {
-													const checkboxVal = [];
-													value.forEach((i) => {
-														options.forEach((j) => {
-															if (i == j.id) {
-																checkboxVal.push(j.name);
-															}
+		data() {
+			return {
+				previewData: {},
+				curMediaData: [],
+				show: false,
+				showTitleBar: true,
+				locationSearch: {},
+				noError: true,
+			};
+		},
+		computed: {
+			equipmentInfo() {
+				if (this.previewData.data) {
+					return this.previewData.data.base_info.elements;
+				} else {
+					return [];
+				}
+			},
+			groupInfo() {
+				if (this.previewData.data) {
+					// 对返回的数据进行处理。
+					return this.previewData.data.check_group.map((group) => {
+						return {
+							...group,
+							components: {
+								...group.components.map((component) => {
+									return {
+										...component,
+										label: component.elements
+											.filter((element) => {
+												return !(
+													element.type === 'singleimage' ||
+													element.type === 'singlevideo' ||
+													element.type === 'multipleimage' ||
+													element.type === 'multiplevideo'
+												);
+											})
+											.reduce((pre, cur) => {
+												// 当value 是一个数组时（element.type === 'checkbox'）。
+												const labelArr = [];
+												const {value, options, name} = cur;
+												if (Array.isArray(value)) {
+													if (value.length !== 0) {
+														const checkboxVal = [];
+														value.forEach((i) => {
+															options.forEach((j) => {
+																if (i == j.id) {
+																	checkboxVal.push(j.name);
+																}
+															});
 														});
-													});
-													labelArr.push(checkboxVal);
-												}
-											} else {
-												if (value) {
-													if (options) {
-														options.forEach((j) => {
-															if (value === j.id) {
-																labelArr.push(j.name);
+														labelArr.push(checkboxVal);
+													}
+												} else {
+													if (value) {
+														if (options) {
+															options.forEach((j) => {
+																if (value === j.id) {
+																	labelArr.push(j.name);
+																}
+															});
+														} else {
+															if (name) {
+																labelArr.push(`${name}:${value}`);
 															}
-														});
-													} else {
-														if (name) {
-															labelArr.push(`${name}:${value}`);
 														}
 													}
 												}
-											}
-											return pre.concat(labelArr);
-										}, []),
-									imgUrl: component.elements
-										.filter(
-											(element) =>
-												element.type === 'singleimage' || element.type === 'multipleimage'
-										)
-										.reduce((pre, cur) => {
-											const imgUrlArr = [];
-											const {value} = cur;
-											if (Array.isArray(value)) {
-												if (value.length !== 0) {
-													imgUrlArr.push(...value);
+												return pre.concat(labelArr);
+											}, []),
+										imgUrl: component.elements
+											.filter(
+												(element) =>
+													element.type === 'singleimage' || element.type === 'multipleimage'
+											)
+											.reduce((pre, cur) => {
+												const imgUrlArr = [];
+												const {value} = cur;
+												if (Array.isArray(value)) {
+													if (value.length !== 0) {
+														imgUrlArr.push(...value);
+													}
+												} else {
+													// 排除是空对象的
+													if (Object.keys(value).length !== 0) {
+														imgUrlArr.push(value);
+													}
 												}
-											} else {
-												// 排除是空对象的
-												if (Object.keys(value).length !== 0) {
-													imgUrlArr.push(value);
+												return pre.concat(imgUrlArr);
+											}, []),
+										videoUrl: component.elements
+											.filter(
+												(element) =>
+													element.type === 'singlevideo' || element.type === 'multiplevideo'
+											)
+											.reduce((pre, cur) => {
+												const imgUrlArr = [];
+												const {value} = cur;
+												if (Array.isArray(value)) {
+													if (value.length !== 0) {
+														imgUrlArr.push(...value);
+													}
+												} else {
+													// 排除是空对象的
+													if (Object.keys(value).length !== 0) {
+														imgUrlArr.push(value);
+													}
 												}
-											}
-											return pre.concat(imgUrlArr);
-										}, []),
-									videoUrl: component.elements
-										.filter(
-											(element) =>
-												element.type === 'singlevideo' || element.type === 'multiplevideo'
-										)
-										.reduce((pre, cur) => {
-											const imgUrlArr = [];
-											const {value} = cur;
-											if (Array.isArray(value)) {
-												if (value.length !== 0) {
-													imgUrlArr.push(...value);
-												}
-											} else {
-												// 排除是空对象的
-												if (Object.keys(value).length !== 0) {
-													imgUrlArr.push(value);
-												}
-											}
-											return pre.concat(imgUrlArr);
-										}, []),
-								};
-							}),
-						},
-					};
-				});
-			} else {
-				return [];
-			}
-		},
-	},
-	created() {
-		this.locationSearch = queryString.parse('?' + location.href.split('?')[1]);
-		if ('showTitleBar' in this.locationSearch) {
-			this.showTitleBar = Number(this.locationSearch.showTitleBar);
-		}
-		if ('token' in this.locationSearch) {
-			this.saveToken();
-			this.getPreviewData();
-		}
-	},
-
-	methods: {
-		saveToken() {
-			sessionStorage.setItem('token', this.locationSearch.token);
-		},
-		handleClickLeft() {},
-		async getPreviewData() {
-			try {
-				const {result} = await getPatrolRecord({
-					id: this.locationSearch.id,
-				});
-				this.previewData = result;
-			} catch (error) {
-				this.noError = false;
-			}
-		},
-		handlePreviewMedia(mediaData) {
-			this.curMediaData = mediaData.map((item) => {
-				if (item.thumbnail) {
-					return {
-						url: item.original,
-						type: 'image',
-					};
+												return pre.concat(imgUrlArr);
+											}, []),
+									};
+								}),
+							},
+						};
+					});
 				} else {
-					return {
-						url: item,
-						type: 'video',
-					};
+					return [];
 				}
-			});
-			this.show = true;
+			},
 		},
-		handleSwipeChange(index) {
-			const swipe = this.$refs.swipe;
-			if (index > 0) {
-				swipe.prev();
-			} else {
-				swipe.next();
+		created() {
+			this.locationSearch = queryString.parse('?' + location.href.split('?')[1]);
+			if ('showTitleBar' in this.locationSearch) {
+				this.showTitleBar = Number(this.locationSearch.showTitleBar);
+			}
+			if ('token' in this.locationSearch) {
+				this.saveToken();
+				this.getPreviewData();
 			}
 		},
-	},
-};
+
+		methods: {
+			saveToken() {
+				sessionStorage.setItem('token', this.locationSearch.token);
+			},
+			handleClickLeft() {},
+			async getPreviewData() {
+				try {
+					const {result} = await getPatrolRecord({
+						id: this.locationSearch.id,
+					});
+					this.previewData = result;
+				} catch (error) {
+					this.noError = false;
+				}
+			},
+			handlePreviewMedia(mediaData) {
+				this.curMediaData = mediaData.map((item) => {
+					if (item.thumbnail) {
+						return {
+							url: item.original,
+							type: 'image',
+						};
+					} else {
+						return {
+							url: item,
+							type: 'video',
+						};
+					}
+				});
+				this.show = true;
+			},
+			handleSwipeChange(index) {
+				const swipe = this.$refs.swipe;
+				if (index > 0) {
+					swipe.prev();
+				} else {
+					swipe.next();
+				}
+			},
+		},
+	};
 </script>
 
 <style lang="less" scoped>
-.base_info {
-	background-color: #fff;
-}
-.equipment_info {
-	display: flex;
-	flex-wrap: wrap;
-	text-align: center;
-	> div {
+	.base_info {
+		background-color: #fff;
+	}
+	.equipment_info {
 		display: flex;
-		flex-direction: column;
-		width: 33.3333%;
-		> span {
-			margin: -0.5px;
-			border: 0.5px solid #ebedf0;
-			line-height: 34px;
+		flex-wrap: wrap;
+		text-align: center;
+		> div {
+			display: flex;
+			flex-direction: column;
+			width: 33.3333%;
+			> span {
+				margin: -0.5px;
+				border: 0.5px solid #ebedf0;
+				line-height: 34px;
+			}
 		}
 	}
-}
-.equipment_info_value {
-	color: #969799;
-}
-.group_info {
-	background-color: #fff;
-	> h4 {
+	.equipment_info_value {
+		color: #969799;
+	}
+	.group_info {
+		background-color: #fff;
+		> h4 {
+			padding: 6px 16px;
+			margin-bottom: 0;
+			margin-top: 6px;
+		}
+	}
+	.component_info {
 		padding: 6px 16px;
-		margin-bottom: 0;
-		margin-top: 6px;
+		border-top: 1px solid #ebedf0;
+		> div {
+			display: flex;
+			justify-content: space-between;
+		}
 	}
-}
-.component_info {
-	padding: 6px 16px;
-	border-top: 1px solid #ebedf0;
-	> div {
-		display: flex;
-		justify-content: space-between;
+	.info_title {
+		margin: 6px 0;
 	}
-}
-.info_title {
-	margin: 6px 0;
-}
-.info_list {
-	font-size: 14px;
-	color: #969799;
-	> li {
-		height: 24px;
-	}
-}
-.media_area {
-	width: 120px;
-	height: 80px;
-	border: 0.5px solid #ebedf0;
-	border-radius: 4px;
-	align-self: flex-end;
-	overflow: hidden;
-	position: relative;
-	> img {
-		height: 100%;
-		width: 100%;
-	}
-	> video {
-		height: 120px;
-		width: 80px;
-	}
-	> span {
+	.info_list {
 		font-size: 14px;
-		background-color: #f2f3f5;
-		padding: 0 6px;
-		position: absolute;
-		bottom: 0;
-		right: 0;
+		color: #969799;
+		> li {
+			height: 24px;
+		}
 	}
-}
-.wrapper {
-	height: 100%;
-}
-.show_media_box {
-	width: 100%;
-	height: 100vh;
-	display: flex;
-	align-items: center;
-	> img {
+	.media_area {
+		width: 120px;
+		height: 80px;
+		border: 0.5px solid #ebedf0;
+		border-radius: 4px;
+		align-self: flex-end;
+		overflow: hidden;
+		position: relative;
+		> img {
+			height: 100%;
+			width: 100%;
+		}
+		> video {
+			height: 120px;
+			width: 80px;
+		}
+		> span {
+			font-size: 14px;
+			background-color: #f2f3f5;
+			padding: 0 6px;
+			position: absolute;
+			bottom: 0;
+			right: 0;
+		}
+	}
+	.wrapper {
+		height: 100%;
+	}
+	.show_media_box {
 		width: 100%;
-		max-height: 100%;
-		object-fit: contain;
+		height: 100vh;
+		display: flex;
+		align-items: center;
+		> img {
+			width: 100%;
+			max-height: 100%;
+			object-fit: contain;
+		}
 	}
-}
-.preview_swipe_item {
-	position: relative;
-}
-.arrow {
-	position: absolute;
-	top: 50%;
-	margin-top: -18px;
-	z-index: 2;
-	width: 36px;
-	height: 36px;
-}
-.arrow_left {
-	left: 10%;
-}
-.arrow_right {
-	right: 10%;
-}
+	.preview_swipe_item {
+		position: relative;
+	}
+	.arrow {
+		position: absolute;
+		top: 50%;
+		margin-top: -18px;
+		z-index: 2;
+		width: 36px;
+		height: 36px;
+	}
+	.arrow_left {
+		left: 10%;
+	}
+	.arrow_right {
+		right: 10%;
+	}
 </style>

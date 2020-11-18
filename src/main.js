@@ -66,6 +66,8 @@ Vue.prototype.$addSrcPrefix = (src, prefix = '/jeecg-boot') => {
 	return '';
 };
 
+Vue.prototype.$time = Date.now();
+
 new Vue({
 	router,
 	render: (h) => h(App),

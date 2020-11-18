@@ -9,62 +9,71 @@
 </template>
 
 <script>
-import formItemMixin from '../mixin/index';
-export default {
-	name: 'input-text',
-	mixins: [formItemMixin],
-	data() {
-		return {
-			timing: false,
-			timeData: 0,
-			animationFrame: null,
-		};
-	},
-	computed: {
-		showTimeData() {
-			return this.timeData / 1000;
-		},
-	},
-	created() {
-		this.timeData = this.elementData.value * 1000;
-	},
-	beforeDestroy() {
-		cancelAnimationFrame(this.animationFrame);
-	},
-	methods: {
-		/**
-		 * @description 定时器的开始（重置） 与 暂停
-		 */
-		handleTimeRun() {
-			if (this.timeData === 0) {
-				this.timing = true;
-				this.interRun();
-			} else {
-				//不等于0 点击需要判断是 重置 还是 停止
-				if (this.timing === false) {
-					this.timeData = 0; // 重置
-				} else {
-					this.timing = false; // 暂停
-				}
-			}
-		},
-		interRun() {
-			const curTime = Date.now();
-			const timeAdd = () => {
-				this.timeData = Date.now() - curTime;
-				if (this.timing === true) {
-					window.requestAnimationFrame(timeAdd);
-				} else {
-					this.$nextTick(() => {
-						this.elementData.value = this.showTimeData;
-					});
-				}
+	import formItemMixin from '../mixin/index';
+	export default {
+		name: 'input-text',
+		mixins: [formItemMixin],
+		data() {
+			return {
+				timing: false,
+				timeData: 0,
+				animationFrame: null,
 			};
-			this.animationFrame = window.requestAnimationFrame(timeAdd);
 		},
-	},
-};
+		computed: {
+			showTimeData() {
+				return this.timeData / 1000;
+			},
+		},
+		created() {
+			this.timeData = this.elementData.value * 1000;
+			console.log(this.$time);
+		},
+		beforeDestroy() {
+			cancelAnimationFrame(this.animationFrame);
+		},
+		watch: {
+			$time(n, o) {
+				console.log(n, o);
+				this.suspend();
+			},
+		},
+		methods: {
+			/**
+			 * @description 定时器的开始（重置） 与 暂停
+			 */
+			handleTimeRun() {
+				if (this.timeData === 0) {
+					this.timing = true;
+					this.interRun();
+				} else {
+					//不等于0 点击需要判断是 重置 还是 停止
+					if (this.timing === false) {
+						this.timeData = 0; // 重置
+					} else {
+						this.suspend(); // 暂停
+					}
+				}
+			},
+			interRun() {
+				const curTime = Date.now();
+				const timeAdd = () => {
+					this.timeData = Date.now() - curTime;
+					if (this.timing === true) {
+						window.requestAnimationFrame(timeAdd);
+					} else {
+						this.$nextTick(() => {
+							this.elementData.value = this.showTimeData;
+						});
+					}
+				};
+				this.animationFrame = window.requestAnimationFrame(timeAdd);
+			},
+			suspend() {
+				this.timing = false;
+			},
+		},
+	};
 </script>
 
-<style lang="less" scoped>
-</style>
+<style lang="less" scoped></style>
