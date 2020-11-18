@@ -90,8 +90,7 @@
 			 * @description 点击导航右侧的保存按钮
 			 */
 			async handleClickRight() {
-				console.log(this.$time);
-				this.$time = Date.now();
+				this.$root.curTime = Date.now();
 				if (!this.otherInfo.id) {
 					try {
 						const {latitude, longitude} = await this.getLocation();

@@ -27,14 +27,12 @@
 		},
 		created() {
 			this.timeData = this.elementData.value * 1000;
-			console.log(this.$time);
 		},
 		beforeDestroy() {
 			cancelAnimationFrame(this.animationFrame);
 		},
 		watch: {
-			$time(n, o) {
-				console.log(n, o);
+			'$root.curTime'() {
 				this.suspend();
 			},
 		},
