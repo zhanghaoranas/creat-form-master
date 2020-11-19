@@ -52,7 +52,7 @@
 			},
 			handleDatePickerShow() {
 				this.datePickerShow = true;
-				if (!this.pickerDate) {
+				if (!this.elementData.value) {
 					this.pickerDate = new Date();
 				}
 			},
