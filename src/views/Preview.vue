@@ -310,8 +310,9 @@
 			width: 100%;
 		}
 		> video {
-			height: 120px;
-			width: 80px;
+			height: 80px;
+			width: 120px;
+			object-fit: cover;
 		}
 		> span {
 			font-size: 14px;
