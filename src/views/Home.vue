@@ -109,13 +109,15 @@
 						check_group: this.checkGroup,
 					},
 				};
-				if (this.otherInfo.id) {
-					const {message} = await updatePatrolRecord(params);
-					this.$toast(message);
-				} else {
-					const {message} = await addPatrolRecord(params);
-					this.$toast(message);
-				}
+				setTimeout(async () => {
+					if (this.otherInfo.id) {
+						const {message} = await updatePatrolRecord(params);
+						this.$toast(message);
+					} else {
+						const {message} = await addPatrolRecord(params);
+						this.$toast(message);
+					}
+				});
 			},
 
 			/**
