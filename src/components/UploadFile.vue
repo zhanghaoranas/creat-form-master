@@ -114,18 +114,18 @@
 					const fileBlob = await changeImgSize(file.file);
 					if (fileBlob.size > limtSize) {
 						const res = await imageConversion.compressAccurately(fileBlob, 90);
-						this.uploadFile(res);
+						this.uploadFile(file, res);
 					} else {
-						this.uploadFile(fileBlob);
+						this.uploadFile(file, fileBlob);
 					}
 				} else {
-					this.uploadFile(file.file);
+					this.uploadFile(file, file.file);
 				}
 			},
 			/**
 			 * @description 上传文件
 			 */
-			async uploadFile(file) {
+			async uploadFile(fileObj, file) {
 				let res;
 				const config = {
 					headers: {'Content-Type': 'multipart/form-data'},
@@ -138,23 +138,14 @@
 					res = await uploadPatrolVideo(forms, config);
 				}
 				const {result} = res;
-				file.status = 'done';
-				file.message = '';
+				fileObj.status = 'done';
+				fileObj.message = '';
+
 				// 多个上传的value为数组，单个上传的为 sting.
 				if (this.isMulti) {
 					this.elementData.value.push(result[0]);
-					this.fileList = this.elementData.value.map((item) => {
-						return {
-							url: this.$addSrcPrefix(item.original ? item.original : item),
-						};
-					});
 				} else {
 					this.elementData.value = result[0];
-					this.fileList = [
-						{
-							url: this.$addSrcPrefix(result[0].original ? result[0].original : result[0]),
-						},
-					];
 				}
 			},
 			/**
