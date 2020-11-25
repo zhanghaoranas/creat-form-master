@@ -24,3 +24,4 @@
 ### 注意
 
 由于使用到了定位，所以需要部署在 https 环境中。
+参数 showTitleBar=0 是用在 pc 端的， shoowTitleBar = 1 用于手机端。

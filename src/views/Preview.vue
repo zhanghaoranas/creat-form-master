@@ -45,13 +45,13 @@
 			</div>
 		</div>
 		<van-empty v-else image="error" description="数据错误,请检查传入的参数是否正确" />
-		<van-overlay :show="show" @click="show = false">
+		<van-overlay :show="show" @click="handleHideSwipe">
 			<div class="wrapper">
-				<van-swipe ref="swipe">
+				<van-swipe ref="swipe" @change="onChange">
 					<van-swipe-item class="preview_swipe_item" v-for="(item, index) in curMediaData" :key="index">
 						<div class="show_media_box">
 							<img v-if="item.type === 'image'" :src="$addSrcPrefix(item.url)" alt="" />
-							<video-show v-else :url="$addSrcPrefix(item.url)"></video-show>
+							<video-show v-else :url="$addSrcPrefix(item.url)" :videoTime="videoTime"></video-show>
 						</div>
 						<div v-if="!showTitleBar" class="arrow arrow_left" @click.stop="handleSwipeChange(-1)">
 							<van-icon name="arrow-left" size="36" color="#000" />
@@ -83,6 +83,7 @@
 				showTitleBar: true,
 				locationSearch: {},
 				noError: true,
+				videoTime: 0,
 			};
 		},
 		computed: {
@@ -238,12 +239,23 @@
 				this.show = true;
 			},
 			handleSwipeChange(index) {
+				console.log(index);
 				const swipe = this.$refs.swipe;
 				if (index > 0) {
-					swipe.prev();
-				} else {
 					swipe.next();
+				} else {
+					swipe.prev();
 				}
+			},
+			/**
+			 * @description 当切换视频swiper时 视频暂停
+			 */
+			onChange() {
+				this.videoTime = Date.now();
+			},
+			handleHideSwipe() {
+				this.videoTime = Date.now();
+				this.show = false;
 			},
 		},
 	};

@@ -144,8 +144,18 @@
 				// 多个上传的value为数组，单个上传的为 sting.
 				if (this.isMulti) {
 					this.elementData.value.push(result[0]);
+					if (!this.isImg) {
+						fileObj.url = this.$addSrcPrefix(result[0]);
+					}
 				} else {
 					this.elementData.value = result[0];
+					if (!this.isImg) {
+						this.fileList = [
+							{
+								url: this.$addSrcPrefix(result[0]),
+							},
+						];
+					}
 				}
 			},
 			/**
