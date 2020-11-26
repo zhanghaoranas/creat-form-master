@@ -48,6 +48,7 @@
 					//不等于0 点击需要判断是 重置 还是 停止
 					if (this.timing === false) {
 						this.timeData = 0; // 重置
+						this.elementData.value = 0;
 					} else {
 						this.suspend(); // 暂停
 					}

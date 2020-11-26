@@ -117,7 +117,7 @@
 						const {message} = await addPatrolRecord(params);
 						this.$toast(message);
 					}
-				});
+				}, 50);
 			},
 
 			/**
